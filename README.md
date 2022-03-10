@@ -1,5 +1,4 @@
 # Employee_Medical_Test
-coming soon
 
 Projekt: Employee Medical Test
 
@@ -8,7 +7,7 @@ Program do wyliczania kosztów badañ okresowych pracownika na podstawie wskazanyc
 Warunki szkodliwe maj¹ przypisane konkretne badania kontrolne na które nale¿y skierowaæ pracownika.
 
 W sytuacji gdy na jednego pracownika przypada wiêcej ni¿ 1 warunek szkodliwy czêœæ tych badañ mo¿e siê powtórzyæ.
-Program eliminuje powtarzaj¹ce siê badania i wylicza koszty w oparciu o sumê badañ z wszystkich warunków szkodliwych.
+Program eliminuje powtarzaj¹ce siê badania i wylicza koszty w oparciu o sumê badañ wszystkich warunków szkodliwych.
 
 UWAGA !!!
 Badania przypisane do warunków szkodliwych w bazie EmployeeMedicalTest zosta³y dobrane losowo i nie odzwierciedlaj¹ faktycznych zaleceñ okreœlonych w przepisach medycyny pracy.
