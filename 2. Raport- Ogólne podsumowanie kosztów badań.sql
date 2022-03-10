@@ -1,25 +1,25 @@
---Tytu³: Raport ogólnym z podsumowaniem kosztów badañ ka¿dego pracownika wraz sum¹ ogóln¹ w skróconej postaci
---Autor: Adam Bernaœ
+ï»¿--TytuÅ‚: Raport z ogÃ³lnym podsumowaniem kosztÃ³w badaÅ„ kaÅ¼dego pracownika wraz sumÄ… ogÃ³lnÄ… w skrÃ³conej postaci
+--Autor: Adam BernaÅ›
 --Update: 06-03-2022
 --Version v1.1
 
-/*Podgl¹d raportu
+/*PodglÄ…d raportu
 SELECT * FROM dbo.View_ShortReportEmpMedTest
 */
 
 USE EmployeeMedicalTest
 GO
---Usuñ widok je¿eli istnieje
+--UsuÅ„ widok jeÅ¼eli istnieje
 IF OBJECT_ID ('dbo.View_ShortReportEmpMedTest') IS NOT NULL DROP VIEW dbo.View_ShortReportEmpMedTest
 GO
 
---Tworzenie widoku z opcj¹ SCHEMABINDING oraz CHECK OPTION
+--Tworzenie widoku z opcjÄ… SCHEMABINDING oraz CHECK OPTION
 
 CREATE VIEW dbo.View_ShortReportEmpMedTest
 WITH SCHEMABINDING
 AS
 
---Tworzenie tablicy Tab z tabel¹ g³ówn¹ raportu
+--Tworzenie tablicy Tab z tabelÄ… gÅ‚Ã³wnÄ… raportu
 WITH Tab AS
 (
 SELECT DISTINCT 
@@ -37,11 +37,11 @@ JOIN dbo.Tests as T
 	ON HCT.IdTest = T.IdTest
 )
 SELECT
---Wykorzystanie fukcji GROUPING_ID w celu opisana podsumowañ elementów zgrupowanych
+--Wykorzystanie fukcji GROUPING_ID w celu opisana podsumowaÅ„ elementÃ³w zgrupowanych
 	ISNULL(EmployeeName,'') as [Imie i nazwisko],
 	CASE (GROUPING_ID(EmployeeName))
-		WHEN 1 THEN 'Suma wszystkich badañ' 
-		WHEN 0 THEN 'Koszt badañ pracownika' 
+		WHEN 1 THEN 'Suma wszystkich badaÅ„' 
+		WHEN 0 THEN 'Koszt badaÅ„ pracownika' 
 		END as Opis,
 	SUM(Price) as Suma
 FROM Tab
