@@ -1,4 +1,4 @@
-﻿--Tytuł: Raport z ogólnym podsumowaniem kosztów badań każdego pracownika wraz sumą ogólną w skróconej postaci
+﻿--Tytuł: Raport z ogólnym podsumowaniem kosztów badań każdego pracownika wraz sumą wszystkich badań. Raport w skróconej postaci
 --Autor: Adam Bernaś
 --Update: 06-03-2022
 --Version v1.1
