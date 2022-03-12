@@ -12,4 +12,4 @@ Program eliminuje powtarzaj¹ce siê badania i wylicza koszty w oparciu o sumê bad
 UWAGA !!!
 Badania przypisane do warunków szkodliwych w bazie EmployeeMedicalTest zosta³y dobrane losowo i nie odzwierciedlaj¹ faktycznych zaleceñ okreœlonych w przepisach medycyny pracy.
 
-W planach rozwoju projektu przewiduje dodanie procedury umo¿liwiaj¹cej proste przypisanie odpowiednich warunków poprzez "przyjazny" interfejs. W pozosta³ych przypadkach nale¿y samodzielnie dokonaæ edycji kodu tworz¹cego tabelê lub dokonaæ update danych.
+Struktura bazy nie odzwierciedla logiki biznesowej - obecnie warunki szkodliwe s¹ przypisane bezpoœrednio do pracownika, poprawna logika wskazuje warunki szkodliwe przypisane do danego stanowiska a stanowiska s¹ przypisane do pracowników. Ten b³¹d zostanie w przysz³oœci naprawiony.
