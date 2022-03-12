@@ -1,19 +1,19 @@
---Tytu³: Raport ze zbiorcz¹ list¹ badañ okresowych pracownika oraz podsumowaniem kosztów
---Autor: Adam Bernaœ
+ï»¿--TytuÅ‚: Raport ze zbiorczÄ… listÄ… badaÅ„ okresowych pracownika oraz podsumowaniem kosztÃ³w
+--Autor: Adam BernaÅ›
 --Update: 05-03-2022
 --Version v1.1
 
-/*Podgl¹d raportu
+/*PodglÄ…d raportu
 SELECT * FROM View_EmployeeMedicalTest
 */
 USE EmployeeMedicalTest
 GO
 
---Usuñ widok je¿eli istnieje
+--UsuÅ„ widok jeÅ¼eli istnieje
 IF OBJECT_ID ('dbo.View_EmployeeMedicalTest') IS NOT NULL DROP VIEW dbo.View_EmployeeMedicalTest
 GO
 
---Tworzenie widoku z opcj¹ SCHEMABINDING oraz CHECK OPTION
+--Tworzenie widoku z opcjÄ… SCHEMABINDING oraz CHECK OPTION
 
 CREATE VIEW dbo.View_EmployeeMedicalTest
 WITH SCHEMABINDING
@@ -38,15 +38,15 @@ JOIN dbo.Tests as T
 SELECT
 	ISNULL(EmployeeName,'') as [Imie i nazwisko],
 	ISNULL(TestName,'') as Badanie,
---Przypisanie nazw zbiorów grupuj¹cych poprzez ich indentyfikacje za poœrednictwem funkcji GROUPING_ID
+--Przypisanie nazw zbiorÃ³w grupujÄ…cych poprzez ich indentyfikacje za poÅ›rednictwem funkcji GROUPING_ID
 	CASE(GROUPING_ID(EmployeeName,TestName))
 	WHEN 0 THEN '' 
-	WHEN 1 THEN 'Koszt badañ pracownika'
-	WHEN 3 THEN 'Suma wszystkich badañ'
+	WHEN 1 THEN 'Koszt badaÅ„ pracownika'
+	WHEN 3 THEN 'Suma wszystkich badaÅ„'
 	END as Opis,
 	SUM(Price) as Cena
 FROM Tab
---Grupowanie z funkcj¹ grupuj¹c¹ która tworzy sumy poœrednie oraz ³¹czne
+--Grupowanie z funkcjÄ… grupujÄ…cÄ… ktÃ³ra tworzy sumy poÅ›rednie oraz Å‚Ä…czne
 GROUP BY
 ROLLUP (EmployeeName, TestName)
 
