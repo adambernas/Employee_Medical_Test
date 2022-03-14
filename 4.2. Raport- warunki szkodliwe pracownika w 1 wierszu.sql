@@ -1,15 +1,15 @@
---Tytu³: Procedura tworzy listê pracowników z podsumowaniem warunków szkodliwych w 1 wierszu
---Autor: Adam Bernaœ
+ï»¿--TytuÅ‚: Procedura tworzy listÄ™ pracownikÃ³w z podsumowaniem warunkÃ³w szkodliwych w 1 wierszu
+--Autor: Adam BernaÅ›
 --Update: 13-03-2022
 --Version v1.1
 
-/*Skrót do obs³ugi procedury
+/*SkrÃ³t do obsÅ‚ugi procedury
 EXEC dbo.EmpHarmCondPlus
 */
 
 USE EmployeeMedicalTest
 GO
---Usuñ Procedure je¿eli istnieje
+--UsuÅ„ Procedure jeÅ¼eli istnieje
 IF OBJECT_ID ('dbo.EmpHarmCondPlus') IS NOT NULL DROP PROC dbo.EmpHarmCondPlus
 GO
 --Tworzenie procedury
@@ -23,8 +23,8 @@ DECLARE @Tab TABLE
 INSERT INTO @Tab(EmpName, HarmCondName, HarmCondCount)
 
 /*Tabela z raporu dbo.View_EmpHarmCond. 
-Mo¿na zastapiæ zmienn¹ tablicow¹ @Tab odniesieniem do widoku dbo.View_EmpHarmCond
-W przypadku zmian w strukturze widoku procedura przestanie dzia³aæ prawid³owo */
+MoÅ¼na zastapiÄ‡ zmiennÄ… tablicowÄ… @Tab odniesieniem do widoku dbo.View_EmpHarmCond
+W przypadku zmian w strukturze widoku procedura przestanie dziaÅ‚aÄ‡ prawidÅ‚owo */
 SELECT   
 		E.Name											  as EmpName,
 		HC.Name											  as HarmCondName,
@@ -35,9 +35,9 @@ JOIN dbo.EmployeeHarmCond		as EHC
 JOIN dbo.HarmfulConditions		as HC
 	ON EHC.IdHC = HC.IdHC;
 
-/* Kursor tworzy wiersz koñcowy przy ka¿dym pracowniku w którym zapisuje wszystkie warunki szkodliwe przypisane do osoby.
-Proœciej by by³o to zrobiæ za pomoc¹ funkcji STRING_AGG, niestety to rozwi¹zanie jest dostêpna od wersji SQL Server 2016,
-kod pisany na wersji SQL Server 2014 st¹d oparcie na kursorze co odbija siê na wydajnoœci i czytelnoœci kodu */
+/* Kursor tworzy wiersz koÅ„cowy przy kaÅ¼dym pracowniku w ktÃ³rym zapisuje wszystkie warunki szkodliwe przypisane do osoby.
+ProÅ›ciej by byÅ‚o to zrobiÄ‡ za pomocÄ… funkcji STRING_AGG, niestety to rozwiÄ…zanie jest dostÄ™pna od wersji SQL Server 2016,
+kod pisany na wersji SQL Server 2014 stÄ…d oparcie na kursorze co odbija siÄ™ na wydajnoÅ›ci i czytelnoÅ›ci kodu */
 DECLARE @Result TABLE
 (
 Id			  INT IDENTITY PRIMARY KEY,
@@ -67,7 +67,7 @@ SET @AllHarmCondName = ''
 WHILE @@FETCH_STATUS = 0
 BEGIN
 			IF @First = 0
-				SET @AllHarmCondName = @AllHarmCondName + '  +  ' --znak rozdzielaj¹cy
+				SET @AllHarmCondName = @AllHarmCondName + '  +  ' --znak rozdzielajÄ…cy
 			ELSE
 				SET @First = 0
 				SET @AllHarmCondName = @AllHarmCondName + @HarmCondName
@@ -88,10 +88,10 @@ CLOSE C;
 DEALLOCATE C;
 
 SET NOCOUNT ON;
---Tworzenie raportu z list¹ pracowników i zbiorczym podsumowaniem wszystkich warunków szkodliwych
-SELECT R1.EmpName as [Imiê i nazwisko],
-	   R1.HarmCondName as [Lista warunków szkodliwych], 
-	   R1.HarmCondCount [Liczba warunków szkodliwych]
+--Tworzenie raportu z listÄ… pracownikÃ³w i zbiorczym podsumowaniem wszystkich warunkÃ³w szkodliwych
+SELECT R1.EmpName as [ImiÄ™ i nazwisko],
+	   R1.HarmCondName as [Lista warunkÃ³w szkodliwych], 
+	   R1.HarmCondCount [Liczba warunkÃ³w szkodliwych]
 FROM @Result as R1
 WHERE R1.Id = (SELECT MAX(R2.Id) 
 			   FROM @Result as R2 
