@@ -1,7 +1,7 @@
 --Tytu³: Generowanie struktury bazy danych EmployeeMedicalTest z przyk³adowymi danymi
 --Autor: Adam Bernaœ
---Update: 02-03-2022
---Wersia: 1.1
+--Update: 13-03-2022
+--Wersia: 1.2
 
 --Sprawdzanie czy baza danych ju¿ istnieje
 IF EXISTS (SELECT name FROM sys.databases WHERE name='EmployeeMedicalTest ')  
@@ -30,18 +30,33 @@ CREATE TABLE dbo.HarmfulConditions
 	Name NVARCHAR(100) NOT NULL
 )
 GO
+--Tworzenie tabeli Workplace
+CREATE TABLE dbo.Workplace
+(	IdWork INT NOT NULL
+		CONSTRAINT PK_Workplace PRIMARY KEY,
+	Name NVARCHAR(30) NOT NULL
+)
+GO
 --Tworzenie tabeli Employee
 CREATE TABLE dbo.Employee
-(	IdEmp INT NOT NULL IDENTITY
+(	IdEmp INT NOT NULL
 		CONSTRAINT PK_Employee PRIMARY KEY,
 	Name NVARCHAR(30) NOT NULL
 )
 GO
---Tworzenie tabeli EmployeeHarmCond
-CREATE TABLE dbo.EmployeeHarmCond		
-(	IdEHC INT NOT NULL IDENTITY
-		CONSTRAINT PK_Employee_HarmCond PRIMARY KEY,
+--Tworzenie tabeli EmployeeWorkplace
+CREATE TABLE dbo.EmployeeWorkplace		
+(	IdEW INT NOT NULL IDENTITY
+		CONSTRAINT PK_EmployeeWorkplace PRIMARY KEY,
 	IdEmp INT NOT NULL,
+	IdWork INT NOT NULL
+)
+GO
+--Tworzenie tabeli WorkplaceHarmCond
+CREATE TABLE dbo.WorkplaceHarmCond		
+(	IdWHC INT NOT NULL IDENTITY
+		CONSTRAINT PK_WorkplaceHarmCond PRIMARY KEY,
+	IdWork INT NOT NULL,
 	IdHC INT NOT NULL
 )
 GO
@@ -105,8 +120,17 @@ INSERT INTO HarmfulConditions(IdHC, Name) VALUES
 (30, 'Wysokoœæ Powy¿ej 3M'),
 (31, 'Zagro¿enie Wynikaj¹ce Ze Sta³ego Du¿ego Dop³ywu Informacji I Gotowoœæ Do Odpowiedzi')
 
+--Wprowadzanie danych do tabeli Workplace
+INSERT INTO dbo.Workplace(IdWork, Name) VALUES
+(1, 'Kierownik'),
+(2, 'Sekretarka'),
+(3, 'Spawacz'),
+(4, 'Magazynier'),
+(5, 'Sprzedawca'),
+(6, 'Monter'),
+(7, 'Elektryk')
+
 --Wprowadzanie danych do tabeli Employee
-SET IDENTITY_INSERT dbo.Employee ON
 INSERT INTO dbo.Employee(IdEmp, Name) VALUES
 (1, 'Jan Kowalski'),
 (2, 'Sebastian Bartniczak'),
@@ -118,11 +142,25 @@ INSERT INTO dbo.Employee(IdEmp, Name) VALUES
 (8, 'Mariusz Psikuta'),
 (9, 'Marcin Adamowicz'),
 (10, 'Kamila Nowak')
-SET IDENTITY_INSERT dbo.Employee OFF
+
+--Wprowadzanie danych do tabeli EmployeeWorkplace
+SET IDENTITY_INSERT dbo.EmployeeWorkplace ON
+INSERT INTO dbo.EmployeeWorkplace(IdEW, IdEmp, IdWork) VALUES
+(1, 1, 1),
+(2, 2, 3),
+(3, 3, 4),
+(4, 4, 5),
+(5, 5, 1),
+(6, 6, 5),
+(7, 7, 6),
+(8, 8, 7),
+(9, 9, 4),
+(10, 10, 2)
+SET IDENTITY_INSERT dbo.EmployeeWorkplace OFF
 
 --Wprowadzanie danych do tabeli EmployeeHarmCond
-SET IDENTITY_INSERT dbo.EmployeeHarmCond ON
-INSERT INTO dbo.EmployeeHarmCond(IdEHC, IdEmp, IdHC) VALUES
+SET IDENTITY_INSERT dbo.WorkplaceHarmCond ON
+INSERT INTO dbo.WorkplaceHarmCond(IdWHC, IdWork, IdHC) VALUES
 (1, 1, 1),
 (2, 1, 2),
 (3, 1, 3),
@@ -148,17 +186,8 @@ INSERT INTO dbo.EmployeeHarmCond(IdEHC, IdEmp, IdHC) VALUES
 (28, 7, 13),
 (29, 7, 20),
 (30, 7, 23),
-(31, 7, 30),
-(32, 8, 13),
-(33, 8, 29),
-(34, 9, 11),
-(35, 9, 13),
-(36, 10, 1),
-(37, 10, 2),
-(38, 10, 3),
-(39, 10, 4),
-(40, 10, 5)
-SET IDENTITY_INSERT dbo.EmployeeHarmCond OFF
+(31, 7, 30)
+SET IDENTITY_INSERT dbo.WorkplaceHarmCond OFF
 
 --Wprowadzanie danych do tabeli HarmCondTests
 SET IDENTITY_INSERT dbo.HarmCondTests ON
@@ -256,13 +285,23 @@ INSERT INTO dbo.HarmCondTests(IdHCT, IdHC, IdTest) VALUES
 SET IDENTITY_INSERT dbo.HarmCondTests OFF
 
 --Tworzenie kluczy obcych do tabel
-ALTER TABLE dbo.EmployeeHarmCond
-	ADD CONSTRAINT FK_EmployeeHarmCond_Employee 
+ALTER TABLE dbo.EmployeeWorkplace
+	ADD CONSTRAINT FK_EmployeeWorkplace_Employee
 	FOREIGN KEY(IdEmp) REFERENCES dbo.Employee(IdEmp)
 	ON DELETE CASCADE ON UPDATE CASCADE
 GO
-ALTER TABLE dbo.EmployeeHarmCond
-	ADD CONSTRAINT FK_EmployeeHarmCond_HarmfulConditions 
+ALTER TABLE dbo.EmployeeWorkplace
+	ADD CONSTRAINT FK_EmployeeWorkplace_Workplace
+	FOREIGN KEY(IdWork) REFERENCES dbo.Workplace(IdWork)
+	ON UPDATE CASCADE
+GO
+ALTER TABLE dbo.WorkplaceHarmCond
+	ADD CONSTRAINT FK_WorkplaceHarmCond_Workplace 
+	FOREIGN KEY(IdWork) REFERENCES dbo.Workplace(IdWork)
+	ON DELETE CASCADE ON UPDATE CASCADE
+GO
+ALTER TABLE dbo.WorkplaceHarmCond
+	ADD CONSTRAINT FK_WorkplaceHarmCond_HarmfulConditions 
 	FOREIGN KEY(IdHC) REFERENCES dbo.HarmfulConditions(IdHC)
 	ON UPDATE CASCADE 
 GO
