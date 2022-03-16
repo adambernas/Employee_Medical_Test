@@ -1,7 +1,7 @@
 ﻿--Tytuł: Raport z ogólnym podsumowaniem kosztów badań każdego pracownika wraz sumą wszystkich badań. Raport w skróconej postaci
 --Autor: Adam Bernaś
---Update: 06-03-2022
---Version v1.1
+--Update: 13-03-2022
+--Version v1.2
 
 /*Podgląd raportu
 SELECT * FROM dbo.View_ShortReportEmpMedTest
@@ -28,12 +28,14 @@ SELECT DISTINCT
 		HCT.IdTest,
 		T.Name as TestName, 
 		T.Price
-FROM dbo.Employee as E
-JOIN dbo.EmployeeHarmCond as EHC
-	ON E.IdEmp = EHC.IdEmp
-JOIN dbo.HarmCondTests as HCT
-	ON EHC.IdHC = HCT.IdHC
-JOIN dbo.Tests as T
+FROM dbo.Employee			as E
+JOIN dbo.EmployeeWorkplace  as EW
+	ON E.IdEmp = EW.IdEmp
+JOIN dbo.WorkplaceHarmCond	as WHC
+	ON EW.IdWork = WHC.IdWork
+JOIN dbo.HarmCondTests		as HCT
+	ON WHC.IdHC = HCT.IdHC
+JOIN dbo.Tests				as T
 	ON HCT.IdTest = T.IdTest
 )
 SELECT
