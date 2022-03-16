@@ -1,7 +1,7 @@
 ﻿--Tytuł: Raport ze zbiorczą listą badań okresowych pracownika oraz podsumowaniem kosztów
 --Autor: Adam Bernaś
---Update: 05-03-2022
---Version v1.1
+--Update: 13-03-2022
+--Version v1.2
 
 /*Podgląd raportu
 SELECT * FROM View_EmployeeMedicalTest
@@ -28,10 +28,12 @@ SELECT DISTINCT
 		T.Name as TestName,
 		T.Price
 FROM dbo.Employee as E
-JOIN dbo.EmployeeHarmCond as EHC
-	ON E.IdEmp = EHC.IdEmp
+JOIN dbo.EmployeeWorkplace as EW
+	ON E.IdEmp = EW.IdEmp
+JOIN dbo.WorkplaceHarmCond as WHC
+	ON EW.IdWork = WHC.IdWork
 JOIN dbo.HarmCondTests as HCT
-	ON EHC.IdHC = HCT.IdHC
+	ON WHC.IdHC = HCT.IdHC
 JOIN dbo.Tests as T
 	ON HCT.IdTest = T.IdTest
 )
