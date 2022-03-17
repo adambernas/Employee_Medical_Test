@@ -1,7 +1,7 @@
 ﻿--Tytuł: Raport z listą warunków szkodliwych pracowników
 --Autor: Adam Bernaś
 --Update: 10-03-2022
---Version v1.1
+--Version v1.2
 
 /*Podgląd raportu
 SELECT * FROM dbo.View_EmpHarmCond
@@ -21,12 +21,17 @@ AS
 
 SELECT   
 		E.Name											  as [Imię i nazwisko],
+		W.Name											  as Stanowisko,
 		HC.Name											  as [Warunki szkodliwe],
-		COUNT(*)OVER(PARTITION BY E.Name ORDER BY E.Name) as [Suma warunków szkodliwych]
+		COUNT(*)OVER(PARTITION BY E.Name ORDER BY E.Name) as [Liczba warunków szkodliwych]
 FROM dbo.Employee				as E
-JOIN dbo.EmployeeHarmCond		as EHC
-	ON E.IdEmp = EHC.IdEmp
+JOIN dbo.EmployeeWorkplace		as EW
+	ON E.IdEmp = EW.IdEmp
+JOIN dbo.Workplace				as W
+	ON EW.IdWork = W.IdWork
+JOIN dbo.WorkplaceHarmCond		as WHC
+	ON EW.IdWork = WHC.IdWork
 JOIN dbo.HarmfulConditions		as HC
-	ON EHC.IdHC = HC.IdHC
+	ON WHC.IdHC = HC.IdHC
 
 WITH CHECK OPTION;
