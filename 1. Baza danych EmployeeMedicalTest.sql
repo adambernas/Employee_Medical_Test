@@ -88,7 +88,7 @@ INSERT INTO dbo.Tests(IdTest, Name, Price) VALUES
 
 --Wprowadzanie danych do tabeli HarmfulConditions
 INSERT INTO HarmfulConditions(IdHC, Name) VALUES
-(1, 'Amioniak'),
+(1, 'Amoniak'),
 (2, 'Detergenty, Œrodki Czystoœci (Dezynfekuj¹ce),'),
 (3, 'DŸwiganie'),
 (4, 'Freony'),
@@ -313,4 +313,4 @@ GO
 ALTER TABLE dbo.HarmCondTests
 	ADD CONSTRAINT FK_HarmCondTests_Tests
 	FOREIGN KEY(IdTest) REFERENCES dbo.Tests(IdTest)
-	ON UPDATE CASCADE
+	ON DELETE CASCADE ON UPDATE CASCADE
