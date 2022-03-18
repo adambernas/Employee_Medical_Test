@@ -1,9 +1,9 @@
---Tytu≥: Generowanie struktury bazy danych EmployeeMedicalTest z przyk≥adowymi danymi
---Autor: Adam Bernaú
+Ôªø--Tytu≈Ç: Generowanie struktury bazy danych EmployeeMedicalTest z przyk≈Çadowymi danymi
+--Autor: Adam Berna≈õ
 --Update: 13-03-2022
 --Wersia: 1.2
 
---Sprawdzanie czy baza danych juø istnieje
+--Sprawdzanie czy baza danych ju≈º istnieje
 IF EXISTS (SELECT name FROM sys.databases WHERE name='EmployeeMedicalTest ')  
 DROP DATABASE EmployeeMedicalTest 
 GO
@@ -79,46 +79,46 @@ INSERT INTO dbo.Tests(IdTest, Name, Price) VALUES
 (7, 'Glukoza', 15),
 (8, 'Psychotechnika', 100),
 (9, 'Nyktometria', 50),
-(10, 'Cholesterol ca≥kowity', 10),
+(10, 'Cholesterol ca≈Çkowity', 10),
 (11, 'Spirometria', 45),
 (12, 'ALT', 35),
-(13, 'Bilirubina ca≥kowita', 20),
+(13, 'Bilirubina ca≈Çkowita', 20),
 (14, 'Morfologia', 30),
 (15, 'RTG klatka piersiowa', 40)
 
 --Wprowadzanie danych do tabeli HarmfulConditions
 INSERT INTO HarmfulConditions(IdHC, Name) VALUES
 (1, 'Amoniak'),
-(2, 'Detergenty, årodki Czystoúci (Dezynfekujπce),'),
-(3, 'Düwiganie'),
+(2, 'Detergenty, ≈örodki Czysto≈õci (DezynfekujƒÖce),'),
+(3, 'D≈∫wiganie'),
 (4, 'Freony'),
-(5, 'Kierowanie Pojazdem S≥uøbowym Kat. B'),
+(5, 'Kierowanie Pojazdem S≈Çu≈ºbowym Kat. B'),
 (6, 'Konkurs Na Kierownika'),
 (7, 'Konkurs Na Dyrektora'),
-(8, 'Maszyna Z Ruchomymi CzÍúciami W Os≥onach'),
-(9, 'Maszyna Z Ruchomymi CzÍúciami Bez Os≥on'),
-(10, 'Mikroklimat Gorπcy'),
+(8, 'Maszyna Z Ruchomymi Czƒô≈õciami W Os≈Çonach'),
+(9, 'Maszyna Z Ruchomymi Czƒô≈õciami Bez Os≈Çon'),
+(10, 'Mikroklimat GorƒÖcy'),
 (11, 'Mikroklimat Zmienny'),
 (12, 'Mikroklimat Zimny'),
-(13, 'Monitor Poniøej, Powyøej, RÛwno 4H'),
-(14, 'Naraøenie Øycia, Stres, DecyzyjnoúÊ'),
+(13, 'Monitor Poni≈ºej, Powy≈ºej, R√≥wno 4H'),
+(14, 'Nara≈ºenie ≈ªycia, Stres, Decyzyjno≈õƒá'),
 (15, 'Nitro (Rozpuszczalniki),'),
-(16, 'OdpowiedzialnoúÊ Finansowa'),
-(17, 'Praca Fizyczna (Düwiganie CiÍøarÛw), - Lekka'),
-(18, 'Praca Fizyczna (Düwiganie CiÍøarÛw), - årednio CiÍøka / CiÍøka / Bez Okreúlenia Jaka'),
-(19, 'Praca Na Wysokoúci Do 3M'),
-(20, 'Praca Na Wysokoúci Powyøej 3M'),
-(21, 'Praca Stresogenna (Stres, Sta≥y Dop≥yw Informacji, DecyzyjnoúÊ),'),
-(22, 'Praca Z NarzÍdziami RÍcznymi'),
-(23, 'Prπd'),
+(16, 'Odpowiedzialno≈õƒá Finansowa'),
+(17, 'Praca Fizyczna (D≈∫wiganie Ciƒô≈ºar√≥w), - Lekka'),
+(18, 'Praca Fizyczna (D≈∫wiganie Ciƒô≈ºar√≥w), - ≈örednio Ciƒô≈ºka / Ciƒô≈ºka / Bez Okre≈õlenia Jaka'),
+(19, 'Praca Na Wysoko≈õci Do 3M'),
+(20, 'Praca Na Wysoko≈õci Powy≈ºej 3M'),
+(21, 'Praca Stresogenna (Stres, Sta≈Çy Dop≈Çyw Informacji, Decyzyjno≈õƒá),'),
+(22, 'Praca Z Narzƒôdziami Rƒôcznymi'),
+(23, 'PrƒÖd'),
 (24, 'Propan'),
 (25, 'Spawanie Gazowe'),
 (26, 'Stanowisko Decyzyjne'),
-(27, 'WÛzek Wid≥owy, Unoszπcy, Drogowy, Jezdniowy Powyøej 1,6M'),
-(28, 'WÛzek Elektryczny'),
-(29, 'WysokoúÊ Poniøej 3M'),
-(30, 'WysokoúÊ Powyøej 3M'),
-(31, 'Zagroøenie Wynikajπce Ze Sta≥ego Duøego Dop≥ywu Informacji I GotowoúÊ Do Odpowiedzi')
+(27, 'W√≥zek Wid≈Çowy, UnoszƒÖcy, Drogowy, Jezdniowy Powy≈ºej 1,6M'),
+(28, 'W√≥zek Elektryczny'),
+(29, 'Wysoko≈õƒá Poni≈ºej 3M'),
+(30, 'Wysoko≈õƒá Powy≈ºej 3M'),
+(31, 'Zagro≈ºenie WynikajƒÖce Ze Sta≈Çego Du≈ºego Dop≈Çywu Informacji I Gotowo≈õƒá Do Odpowiedzi')
 
 --Wprowadzanie danych do tabeli Workplace
 INSERT INTO dbo.Workplace(IdWork, Name) VALUES
@@ -138,7 +138,7 @@ INSERT INTO dbo.Employee(IdEmp, Name) VALUES
 (4, 'Marek Misiunia'),
 (5, 'Adam Bystry'),
 (6, 'Kamil Kania'),
-(7, '£ukasz Mikula'),
+(7, '≈Åukasz Mikula'),
 (8, 'Mariusz Psikuta'),
 (9, 'Marcin Adamowicz'),
 (10, 'Kamila Nowak')
