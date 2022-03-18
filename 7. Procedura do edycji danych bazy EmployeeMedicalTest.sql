@@ -1,8 +1,8 @@
 ﻿--Tytuł: Procedura do edycji danych w bazie EmployeeMedicalTest.
 --Opis: Umożliwia aktualizowanie, usuwanie lub dodawanie danych do tabel.
 --Autor: Adam Bernaś
---Update: 15-03-2022
---Wersja: 1.1 
+--Update: 17-03-2022
+--Wersja: 1.2 
 
 --WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS
 --WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS
@@ -23,9 +23,10 @@ EXEC EditData_EmpMedTest
 Instrukcja obsługi procedury
 Wybierz zadanie który chcesz wykonać, skopiuj zmienne @ i wklej do skrótu obsługi procedury
 
-1. UPDATE ceny badania z tabeli: SELECT * FROM dbo.Tests
-	@IdTest= - Wprowadź numer id badań
-	@Price=  - Wprowadź nową cene badań
+1. UPDATE ceny lub DELETE badania z tabeli: SELECT * FROM dbo.Tests
+	@TestToDo= - Wprowadź co chcesz zrobić: 'update' lub 'delete'
+	@IdTest=   - Wprowadź numer id badań
+	@Price=    - Przy 'update'. Wprowadź nową cene badań
 
 2. UPDATE nazwy lub DELETE stanowiska pracy z tabeli: SELECT * FROM dbo.Workplace
 	@WorkToDo= - Wprowadź co chcesz zrobić: 'update' lub 'delete'
@@ -79,16 +80,14 @@ Wybierz zadanie który chcesz wykonać, skopiuj zmienne @ i wklej do skrótu obs
 
 USE EmployeeMedicalTest
 GO
-
 --Usuń procedure jeżeli istnieje
 IF OBJECT_ID ('dbo.EditData_EmpMedTest') IS NOT NULL DROP PROC dbo.EditData_EmpMedTest
 GO
-
 --Tworzenie procedury
 CREATE PROC EditData_EmpMedTest
 
 --Konfiguracja zmiennych
-
+@TestToDo as NVARCHAR(10) = NULL,
 @IdTest as INT = NULL,
 @Price as MONEY = NULL,
 @IdWork as INT = NULL,
@@ -117,157 +116,333 @@ CREATE PROC EditData_EmpMedTest
 @AddHarmCond6 as INT = NULL,
 @AddHarmCond7 as INT = NULL,
 @AddHarmCondName as NVARCHAR(100) = NULL
-
 AS
 BEGIN TRAN
 
 BEGIN TRY
 
 SET NOCOUNT ON;
--- 1. Aktualizacja ceny testu
-IF @IdTest IS NOT NULL AND @Price IS NOT NULL
-	BEGIN
-		WITH UpdatePriceTest
-		AS
-		(SELECT IdTest, Price, Name 
-		FROM dbo.Tests
-		WHERE IdTest = @IdTest)
 
-		UPDATE UpdatePriceTest
-		SET Price = @Price
-		OUTPUT
-		inserted.IdTest as IdTest,
-		inserted.Name   as TestName,
-		deleted.Price   as Old_TestPrice,
-		inserted.Price  as New_TestPrice;
-	END
+--Sprawdź poprawność komendy @TestToDo
+IF @TestToDo IS NOT NULL
+BEGIN
+	IF @TestToDo NOT IN ('update', 'delete' )
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Wprowadź poprawną komende: update lub delete'
+			RETURN
+		END
+END;
+
+-- 1.1 Aktualizacja ceny badania
+IF @TestToDo = 'update' AND @IdTest IS NOT NULL AND @Price IS NOT NULL
+BEGIN
+--Sprawdź czy numer @IdTest istnieje w tabeli Tests
+IF NOT EXISTS
+	(SELECT IdTest FROM dbo.Tests WHERE IdTest = @IdTest)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id badania, sprawdź listę w tabeli dbo.Test'
+			RETURN
+		END;
+	WITH UpdatePriceTest
+	AS
+	(SELECT IdTest, Price, Name 
+	FROM dbo.Tests
+	WHERE IdTest = @IdTest)
+
+	UPDATE UpdatePriceTest
+	SET Price = @Price
+	OUTPUT
+	inserted.IdTest as IdTest,
+	inserted.Name   as TestName,
+	deleted.Price   as Old_TestPrice,
+	inserted.Price  as New_TestPrice;
+END;
+
+-- 1.2 Usunięcie badania z tabeli
+IF @TestToDo = 'delete' AND @IdTest IS NOT NULL
+BEGIN
+--Sprawdź czy numer @IdTest istnieje w tabeli Tests
+IF NOT EXISTS
+	(SELECT IdTest FROM dbo.Tests WHERE IdTest = @IdTest)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id badania, sprawdź listę w tabeli dbo.Test'
+			RETURN
+		END;
+	WITH DeleteTest
+	AS
+	(SELECT IdTest, Price, Name 
+	FROM dbo.Tests
+	WHERE IdTest = @IdTest)
+
+	DELETE DeleteTest
+	OUTPUT
+		deleted.IdTest as Delete_IdTest,
+		deleted.Name   as Delete_TestName,
+		deleted.Price  as Deleted_TestPrice
+END;
+
+--Sprawdź poprawność komendy @WorkToDo
+IF @WorkToDo IS NOT NULL
+BEGIN
+	IF @WorkToDo NOT IN ('update', 'delete' )
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Wprowadź poprawną komende: update lub delete'
+			RETURN
+		END
+END;
+
 -- 2.1 Aktualizacja nazwy stanowiska pracy
 IF @WorkToDo = 'update' AND @IdWork IS NOT NULL AND @WorkName IS NOT NULL
-	BEGIN
-		WITH UpdateWorkName
-		AS
-		(SELECT IdWork, Name 
-		FROM dbo.Workplace
-		WHERE IdWork = @IdWork)
+BEGIN
+--Sprawdź czy numer @IdWork istnieje w tabeli dbo.Workplace
+IF NOT EXISTS
+	(SELECT IdWork FROM dbo.Workplace WHERE IdWork = @IdWork)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id stanowiska pracy, sprawdź listę w tabeli dbo.Workplace'
+			RETURN
+		END;
+--Sprawdź czy nazwa @WorkName już istnieje w tabeli dbo.Workplace
+IF EXISTS
+	(SELECT Name FROM dbo.Workplace WHERE NAME = @WorkName)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Takie stanowisko już istnieje, sprawdź listę w tabeli dbo.Workplace'
+			RETURN
+		END;
+	WITH UpdateWorkName
+	AS
+	(SELECT IdWork, Name 
+	FROM dbo.Workplace
+	WHERE IdWork = @IdWork)
 
-		UPDATE UpdateWorkName
-		SET Name = @WorkName
-		OUTPUT
-			inserted.IdWork as IdWork,
-			deleted.Name    as Old_WorkName,
-			inserted.Name   as New_WorkName;
-	END
--- 2.2 Usunięcie nazwy stanowiska pracy
+	UPDATE UpdateWorkName
+	SET Name = @WorkName
+	OUTPUT
+		inserted.IdWork as IdWork,
+		deleted.Name    as Old_WorkName,
+		inserted.Name   as New_WorkName;
+END;
+
+-- 2.2 Usunięcie stanowiska pracy z tabeli
 IF @WorkToDo = 'delete' AND @IdWork IS NOT NULL
-	BEGIN
-		WITH DeleteWorkName
-		AS
-		(SELECT IdWork, Name 
-		FROM dbo.Workplace
-		WHERE IdWork = @IdWork)
+BEGIN
+--Sprawdź czy numer @IdWork istnieje w tabeli dbo.Workplace
+IF NOT EXISTS
+	(SELECT IdWork FROM dbo.Workplace WHERE IdWork = @IdWork)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id stanowiska pracy, sprawdź listę w tabeli dbo.Workplace'
+			RETURN
+		END;
+	WITH DeleteWorkName
+	AS
+	(SELECT IdWork, Name 
+	FROM dbo.Workplace
+	WHERE IdWork = @IdWork)
 
-		DELETE DeleteWorkName
-		OUTPUT
-			deleted.IdWork as Delete_IdWork,
-			deleted.Name   as Delete_WorkName
-		WHERE IdWork = @IdWork;
-	END
+	DELETE DeleteWorkName
+	OUTPUT
+		deleted.IdWork as Delete_IdWork,
+		deleted.Name   as Delete_WorkName
+END;
+
+--Sprawdź poprawność komendy @WorkToDo
+IF @EmpToDo IS NOT NULL
+BEGIN
+	IF @EmpToDo NOT IN ('update', 'delete' )
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Wprowadź poprawną komende: update lub delete'
+			RETURN
+		END
+END;
+
 -- 3.1 Aktualizacja imienia i nazwiska pracownika
 IF @EmpToDo = 'update' AND @IdEmp IS NOT NULL AND @EmpName IS NOT NULL
-	BEGIN
-		WITH UpdateEmpName
-		AS
-		(SELECT IdEmp, Name 
-		FROM dbo.Employee
-		WHERE IdEmp = @IdEmp)
+BEGIN
+--Sprawdź czy numer @IdEmp istnieje w tabeli dbo.Employee
+IF NOT EXISTS
+	(SELECT IdEmp FROM dbo.Employee WHERE IdEmp = @IdEmp)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id pracownika, sprawdź listę w tabeli dbo.Employee'
+			RETURN
+		END;
+--Sprawdź czy dane @EmpName już istnieją w tabeli dbo.Employee
+IF EXISTS
+	(SELECT Name FROM dbo.Employee WHERE NAME = @EmpName)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Taki pracownik już istnieje, sprawdź listę w tabeli dbo.Employee'
+			RETURN
+		END;
+	WITH UpdateEmpName
+	AS
+	(SELECT IdEmp, Name 
+	FROM dbo.Employee
+	WHERE IdEmp = @IdEmp)
 
-		UPDATE UpdateEmpName
-		SET Name = @EmpName
-		OUTPUT
-			inserted.IdEmp as IdEmp,
-			deleted.Name   as Old_EmpName,
-			inserted.Name  as New_EmpName;
-	END
+	UPDATE UpdateEmpName
+	SET Name = @EmpName
+	OUTPUT
+		inserted.IdEmp as IdEmp,
+		deleted.Name   as Old_EmpName,
+		inserted.Name  as New_EmpName;
+END;
+
 -- 3.2 Usunięcie danych pracownika
 IF @EmpToDo = 'delete' AND @IdEmp IS NOT NULL
-	BEGIN
-		WITH DeleteEmpName
-		AS
-		(SELECT IdEmp, Name 
-		FROM dbo.Employee
-		WHERE IdEmp = @IdEmp)
+BEGIN
+--Sprawdź czy numer @IdEmp istnieje w tabeli dbo.Employee
+IF NOT EXISTS
+	(SELECT IdEmp FROM dbo.Employee WHERE IdEmp = @IdEmp)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id pracownika, sprawdź listę w tabeli dbo.Employee'
+			RETURN
+		END;
+	WITH DeleteEmpName
+	AS
+	(SELECT IdEmp, Name 
+	FROM dbo.Employee
+	WHERE IdEmp = @IdEmp)
 
-		DELETE DeleteEmpName
-		OUTPUT
-			deleted.IdEmp as Deleted_IdEmp,
-			deleted.Name  as Deleted_EmpName
-		WHERE IdEmp = @IdEmp;
-	END
+	DELETE DeleteEmpName
+	OUTPUT
+		deleted.IdEmp as Deleted_IdEmp,
+		deleted.Name  as Deleted_EmpName
+END;
+
 -- 4. Aktualizacja listy badań warunków szkodliwych
 IF @IdHarmCond IS NOT NULL AND @AddTest1 IS NOT NULL
-	BEGIN
-		WITH UpdateHarmCondTest
-		AS
-		(SELECT IdHC, IdTest
-		FROM dbo.HarmCondTests
-		WHERE IdHC = @IdHarmCond)
+BEGIN
+--Sprawdź czy numer @IdHarmCond istnieje w tabeli dbo.HarmfulConditions
+IF NOT EXISTS
+	(SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @IdHarmCond)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+--Sprawdź czy numer @AddTests istnieje w tabeli dbo.Tests
+IF NOT EXISTS
+	(SELECT IdTest FROM dbo.Tests
+	WHERE IdTest IN (@AddTest1, @AddTest2, @AddTest3, @AddTest4, @AddTest5))
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;		
+	WITH UpdateHarmCondTest
+	AS
+	(SELECT IdHC, IdTest
+	FROM dbo.HarmCondTests
+	WHERE IdHC = @IdHarmCond)
 
-		DELETE UpdateHarmCondTest
-			OUTPUT
-				deleted.IdHC   as IdHarmCond,
-				deleted.IdTest as Old_IdTest
-		WHERE IdHC = @IdHarmCond
+	DELETE UpdateHarmCondTest
+		OUTPUT
+			deleted.IdHC   as IdHarmCond,
+			deleted.IdTest as Old_IdTest
 
-		INSERT INTO dbo.HarmCondTests(IdHC, IdTest)
-			OUTPUT
-			inserted.IdHC   as IdHarmCond,
-			inserted.IdTest as New_IdTest
-				SELECT @IdHarmCond, IdTest FROM dbo.Tests
-				WHERE IdTest IN (@AddTest1, @AddTest2, @AddTest3, @AddTest4, @AddTest5)
-	END
+	INSERT INTO dbo.HarmCondTests(IdHC, IdTest)
+		OUTPUT
+		inserted.IdHC   as IdHarmCond,
+		inserted.IdTest as New_IdTest
+			SELECT @IdHarmCond, IdTest FROM dbo.Tests
+			WHERE IdTest IN (@AddTest1, @AddTest2, @AddTest3, @AddTest4, @AddTest5)
+END;
+
+IF @HarmCondToDo IS NOT NULL
+BEGIN
+	IF @HarmCondToDo NOT IN ('update', 'delete' )
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Wprowadź poprawną komende: update lub delete'
+			RETURN
+		END
+END;
+
 --5.1 Aktualizacja nazwy warunków szkodliwych
 IF @HarmCondToDo = 'update' AND @IdHarmCond IS NOT NULL	AND @AddHarmCondName IS NOT NULL
-	BEGIN
-		WITH UpdateHarmCondName
-		AS
-		(SELECT IdHC, Name
-		FROM dbo.HarmfulConditions
-		WHERE IdHC = @IdHarmCond)
+BEGIN
+--Sprawdź czy numer @IdHarmCond istnieje w tabeli dbo.HarmfulConditions
+	IF NOT EXISTS
+	(SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @IdHarmCond)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+--Sprawdź czy nazwa @AddHarmCondName już istnieje w tabeli dbo.HarmfulConditions
+IF EXISTS
+	(SELECT Name FROM dbo.HarmfulConditions WHERE Name = @AddHarmCondName)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Taka nazwa warunków szkodliwych już istnieje, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+	WITH UpdateHarmCondName
+	AS
+	(SELECT IdHC, Name
+	FROM dbo.HarmfulConditions
+	WHERE IdHC = @IdHarmCond)
 
-		UPDATE UpdateHarmCondName
-		SET Name = @AddHarmCondName
-			OUTPUT
-				inserted.IdHC as IdHarmCond,
-				deleted.Name  as Old_HarmCondName,
-				inserted.Name as New_HarmCondName;
-	END
+	UPDATE UpdateHarmCondName
+	SET Name = @AddHarmCondName
+		OUTPUT
+			inserted.IdHC as IdHarmCond,
+			deleted.Name  as Old_HarmCondName,
+			inserted.Name as New_HarmCondName;
+END;
+
 --5.2 Usunięcie warunków szkodliwych
 IF @HarmCondToDo = 'delete' AND @IdHarmCond IS NOT NULL
-	BEGIN
-		WITH DeleteHarmCond
-		AS
-		(SELECT IdHC, Name
-		FROM dbo.HarmfulConditions
-		WHERE IdHC = @IdHarmCond)
+BEGIN
+--Sprawdź czy numer @IdHarmCond istnieje w tabeli dbo.HarmfulConditions
+IF NOT EXISTS
+	(SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @IdHarmCond)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+	WITH DeleteHarmCond
+	AS
+	(SELECT IdHC, Name
+	FROM dbo.HarmfulConditions
+	WHERE IdHC = @IdHarmCond)
 
-		DELETE DeleteHarmCond
-		OUTPUT
-			deleted.IdHC as Delete_IdHarmCond,
-			deleted.Name as Deleted_HarmCondName
-		WHERE IdHC = @IdHarmCond;
-	END
+	DELETE DeleteHarmCond
+	OUTPUT
+		deleted.IdHC as Delete_IdHarmCond,
+		deleted.Name as Deleted_HarmCondName
+END;
+
 --6. Dodanie nowego rodzaju testu
 IF @AddTestName IS NOT NULL AND @AddPrice IS NOT NULL
-	BEGIN
-		INSERT INTO dbo.Tests(IdTest, Name, Price) 
-		OUTPUT
-			inserted.IdTest as New_IdTest,
-			inserted.Name   as New_TestName,
-			inserted.Price  as New_TestPrice
-		VALUES
-		-- IdTest nie jest typu IDENTITY. Metoda pozwala dodać Id o 1 większe od ostatniego
-			((SELECT MAX(T2.IdTest) +1 FROM dbo.Tests as T2), @AddTestName, @AddPrice);
-	END
+BEGIN
+	IF EXISTS 
+		(SELECT Name FROM dbo.Tests WHERE Name = @AddTestName)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Taka nazwa badań już istnieje, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+	INSERT INTO dbo.Tests(IdTest, Name, Price) 
+	OUTPUT
+		inserted.IdTest as New_IdTest,
+		inserted.Name   as New_TestName,
+		inserted.Price  as New_TestPrice
+	VALUES
+	-- IdTest nie jest typu IDENTITY. Metoda pozwala dodać Id o 1 większe od ostatniego
+		((SELECT MAX(T2.IdTest) +1 FROM dbo.Tests as T2), @AddTestName, @AddPrice);
+END;
+	
 --7. Dodanie nowego pracownika wraz z określeniem stanowiska pracy
 IF @AddEmpName IS NOT NULL
 	BEGIN
@@ -286,7 +461,8 @@ IF @AddEmpName IS NOT NULL
 				 inserted.IdEmp  as New_IdEmp,
 				 inserted.IdWork as IdWork
 			VALUES (@NextIdEmp, @AddEmpWork);
-	END
+	END;
+
 --8. Dodanie nowego stanowiska pracy wraz z przypisanymi warunkami szkodliwymi
 IF @AddWorkName IS NOT NULL AND @AddHarmCond1 IS NOT NULL
 	BEGIN
