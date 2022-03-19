@@ -1,44 +1,36 @@
 ﻿--Tytuł: Procedura do edycji danych w bazie EmployeeMedicalTest.
 --Opis: Umożliwia aktualizowanie, usuwanie lub dodawanie danych do tabel.
 --Autor: Adam Bernaś
---Update: 17-03-2022
+--Update: 18-03-2022
 --Wersja: 1.2 
-
---WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS
---WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS
---WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS
---WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS
---WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS * WORK IN PROGRESS
 /*=========================================================================================
-Skróty do obsługi procedury
+SKRÓTY DO OBSŁUGI PROCEDURY
 Zadania można ze sobą łączyć wykonując kilka jednoczenie.
-Przykład zastosowania skrótu na podstawie zadania 1. UPDATE ceny testu
-
-USE EmployeeMedicalTest
-EXEC EditData_EmpMedTest
-	 @IdTest = 1,
-	 @Price = 185
-
-===========================================================================================
-Instrukcja obsługi procedury
-Wybierz zadanie który chcesz wykonać, skopiuj zmienne @ i wklej do skrótu obsługi procedury
 
 1. UPDATE ceny lub DELETE badania z tabeli: SELECT * FROM dbo.Tests
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@TestToDo= - Wprowadź co chcesz zrobić: 'update' lub 'delete'
 	@IdTest=   - Wprowadź numer id badań
 	@Price=    - Przy 'update'. Wprowadź nową cene badań
 
 2. UPDATE nazwy lub DELETE stanowiska pracy z tabeli: SELECT * FROM dbo.Workplace
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest	
 	@WorkToDo= - Wprowadź co chcesz zrobić: 'update' lub 'delete'
 	@IdWork=   - Wprowadź numer id stanowiska do zaktualizowania lub usunięcia
 	@WorkName= - Przy 'update'. Wprowadź nową nazwę
 
 3. UPDATE lub DELETE imienia i nazwiska z tabeli: SELECT * FROM dbo.Employee
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@EmpToDo= - Wprowadź co chcesz zrobić: 'update' lub 'delete'
 	@IdEmp=	  - Wprowadź numer id pracownika do zaktualizowania lub usunięcia
 	@EmpName= - Przy 'update'. Wprowadź nowe imię i nazwisko
 
 4. UPDATE listy badań dla warunków szkodliwych z tabeli: SELECT * FROM HarmfulConditions
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@IdHarmCond= - Wprowadź numer id warunków szkodliwych
 	@AddTest1=	 - Wprowadź Id badań z listy: SELECT * FROM Tests
 	@AddTest2=	   Przy kilku badaniach podaj każde osobno (max 5)
@@ -47,29 +39,37 @@ Wybierz zadanie który chcesz wykonać, skopiuj zmienne @ i wklej do skrótu obs
 	@AddTest5=
 
 5. UPDATE nazwy lub DELETE warunków szkodliwych z tabeli: SELECT * FROM HarmfulConditions
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@HarmCondToDo=	  - Wprowadź co chcesz zrobić: 'update' lub 'delete'
 	@IdHarmCond=	  - Wprowadź numer id warunków szkodliwych
 	@AddHarmCondName= - Przy 'update'. Wprowadź nową nazwę warunków szkodliwych
 
 6. INSERT nowych badań do tabeli: SELECT * FROM dbo.Tests
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@AddTestName= - Wprowadź nazwę nowego badania
 	@AddPrice=	  - Wprowadź cenę badania
 
 7. INSERT nowego pracownika wraz z określeniem stanowiska
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@AddEmpName= - Wprowadź imię i nazwisko nowego pracownika z tabeli: SELECT * FROM dbo.Employee
 	@AddEmpWork= - Wprowadź id stanowiska z tabeli: SELECT * FROM dbo.Workplace 
 
 8. INSERT nowego stanowiska pracy wraz z przypisaniem warunków szkodliwych
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@AddWorkName=  - Wprowadź nazwę nowego stanowiska pracy do tabeli: SELECT * FROM dbo.Workplace
 	@AddHarmCond1= - Wprowadź Id warunków szkodliwych z tabeli: SELECT * FROM HarmfulConditions
-	@AddHarmCond2=	 Przy kilku warunkach należy podać każde osobno (max 7)
+	@AddHarmCond2=	 Przy kilku warunkach należy podać każde osobno (max 5)
 	@AddHarmCond3=
 	@AddHarmCond4=
 	@AddHarmCond5=
-	@AddHarmCond6=
-	@AddHarmCond7
 
 9. INSERT nowych warunków szkodliwych z przypisaniem badań
+	USE EmployeeMedicalTest
+	EXEC EditData_EmpMedTest
 	@AddHarmCondName= - Wprowadź nazwę nowych warunków szkodliwych do tabeli: SELECT * FROM HarmfulConditions
 	@AddTest1=		  - Wprowadź Id badań z tabeli: SELECT * FROM Tests
 	@AddTest2=			Przy kilku badaniach podaj każde osobno (max 5)
@@ -113,8 +113,6 @@ CREATE PROC EditData_EmpMedTest
 @AddHarmCond3 as INT = NULL,
 @AddHarmCond4 as INT = NULL,
 @AddHarmCond5 as INT = NULL,
-@AddHarmCond6 as INT = NULL,
-@AddHarmCond7 as INT = NULL,
 @AddHarmCondName as NVARCHAR(100) = NULL
 AS
 BEGIN TRAN
@@ -329,15 +327,42 @@ IF NOT EXISTS
 			PRINT 'Nie ma takiego numeru id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
 			RETURN
 		END;
---Sprawdź czy numer @AddTests istnieje w tabeli dbo.Tests
-IF NOT EXISTS
-	(SELECT IdTest FROM dbo.Tests
-	WHERE IdTest IN (@AddTest1, @AddTest2, @AddTest3, @AddTest4, @AddTest5))
-		BEGIN
+--Sprawdź czy numery @AddTests istnieją w tabeli dbo.Tests
+IF @AddTest1 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest1)
+		BEGIN	
 			ROLLBACK TRAN
-			PRINT 'Nie ma takiego numeru id badań, sprawdź listę w tabeli dbo.Tests'
+			PRINT '@AddTest1: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
 			RETURN
-		END;		
+		END;
+IF @AddTest2 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest2)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest2: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+IF @AddTest3 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest3)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest3: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+IF @AddTest4 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest4)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest4: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+IF @AddTest5 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest5)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest5: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;	
 	WITH UpdateHarmCondTest
 	AS
 	(SELECT IdHC, IdTest
@@ -426,13 +451,15 @@ END;
 --6. Dodanie nowego rodzaju testu
 IF @AddTestName IS NOT NULL AND @AddPrice IS NOT NULL
 BEGIN
-	IF EXISTS 
-		(SELECT Name FROM dbo.Tests WHERE Name = @AddTestName)
+--Sprawdź czy nazwa @AddTestName już istnieje w tabeli dbo.Tests
+IF EXISTS 
+	(SELECT Name FROM dbo.Tests WHERE Name = @AddTestName)
 		BEGIN
 			ROLLBACK TRAN
 			PRINT 'Taka nazwa badań już istnieje, sprawdź listę w tabeli dbo.Tests'
 			RETURN
 		END;
+--Wstawianie nowych danych do tabeli Tests
 	INSERT INTO dbo.Tests(IdTest, Name, Price) 
 	OUTPUT
 		inserted.IdTest as New_IdTest,
@@ -446,10 +473,27 @@ END;
 --7. Dodanie nowego pracownika wraz z określeniem stanowiska pracy
 IF @AddEmpName IS NOT NULL
 	BEGIN
+--Sprawdź czy nazwa @AddEmpName już istnieje w tabeli dbo.Employee
+IF EXISTS
+	(SELECT Name FROM dbo.Employee WHERE Name = @AddEmpName)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Taki pracownik już istnieje, sprawdź listę w tabeli dbo.Employee'
+			RETURN
+		END;
+--Sprawdź czy numer @IdWork istnieje w tabeli dbo.Workplace
+IF NOT EXISTS
+	(SELECT IdWork FROM dbo.Workplace WHERE IdWork = @IdWork)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Nie ma takiego numeru id stanowiska pracy, sprawdź listę w tabeli dbo.Workplace'
+			RETURN
+		END;
 -- IdEmp nie jest typu IDENTITY
--- Metoda dodaje Id o 1 większe od ostatniego i zapisuje w zmiennej @NextIdEmp
+-- Metoda ustawia Id o 1 większe od ostatniego i zapisuje w zmiennej @NextIdEmp
 	DECLARE @NextIdEmp as INT = (SELECT MAX(IdEmp) +1 FROM dbo.Employee)
 
+--Wstawianie nowych danych do tabel Employee i EmployeeWorkplace
 		INSERT INTO dbo.Employee (IdEmp, Name)
 			OUTPUT
 				inserted.IdEmp as New_IdEmp,
@@ -465,45 +509,134 @@ IF @AddEmpName IS NOT NULL
 
 --8. Dodanie nowego stanowiska pracy wraz z przypisanymi warunkami szkodliwymi
 IF @AddWorkName IS NOT NULL AND @AddHarmCond1 IS NOT NULL
-	BEGIN
+BEGIN
+--Sprawdź czy nazwa @AddWorkName już istnieje w tabeli dbo.Workplace
+IF EXISTS
+	(SELECT Name FROM dbo.Workplace WHERE Name = @AddWorkName)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Takie stanowisko już istnieje, sprawdź listę w tabeli dbo.Workplace'
+			RETURN
+		END;
+--Sprawdź czy numery @AddHarmCond istnieją w tabeli dbo.HarmfulConditions
+IF @AddHarmCond1 IS NOT NULL
+	IF NOT EXISTS (SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @AddHarmCond1)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddHarmCond1: Nie ma takiego id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+IF @AddHarmCond2 IS NOT NULL
+	IF NOT EXISTS (SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @AddHarmCond2)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddHarmCond2: Nie ma takiego id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+IF @AddHarmCond3 IS NOT NULL
+	IF NOT EXISTS (SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @AddHarmCond3)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddHarmCond3: Nie ma takiego id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+IF @AddHarmCond4 IS NOT NULL
+	IF NOT EXISTS (SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @AddHarmCond4)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddHarmCond4: Nie ma takiego id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+IF @AddHarmCond5 IS NOT NULL
+	IF NOT EXISTS (SELECT IdHC FROM dbo.HarmfulConditions WHERE IdHC = @AddHarmCond5)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddHarmCond5: Nie ma takiego id warunków szkodliwych, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
 -- IdWork nie jest typu IDENTITY
--- Metoda dodaje Id o 1 większe od ostatniego i zapisuje w zmiennej @NextIdWork
+-- Metoda ustawia Id o 1 większe od ostatniego i zapisuje w zmiennej @NextIdWork
 	DECLARE @NextIdWork as INT = (SELECT MAX(IdWork) +1 FROM dbo.Workplace)
 
-		INSERT INTO dbo.Workplace (IdWork, Name)
-			OUTPUT
-				inserted.IdWork as New_IdWork,
-				inserted.Name   as New_WorkName
-			VALUES (@NextIdWork, @AddWorkName);
+--Wstawianie nowych danych do tabel Workplace i WorkplaceHarmCond
+	INSERT INTO dbo.Workplace (IdWork, Name)
+		OUTPUT
+			inserted.IdWork as New_IdWork,
+			inserted.Name   as New_WorkName
+		VALUES (@NextIdWork, @AddWorkName);
 
-		INSERT INTO dbo.WorkplaceHarmCond (IdWork, IdHC)
-			OUTPUT
-				inserted.IdWork as New_IdWork,
-				inserted.IdHC as IdHarmCond
-			SELECT @NextIdWork, IdHC FROM dbo.HarmfulConditions 
-				WHERE IdHC IN (@AddHarmCond1, @AddHarmCond2, @AddHarmCond3, 
-							   @AddHarmCond4, @AddHarmCond5, @AddHarmCond6, @AddHarmCond7);
-	END
+	INSERT INTO dbo.WorkplaceHarmCond (IdWork, IdHC)
+		OUTPUT
+			inserted.IdWork as New_IdWork,
+			inserted.IdHC as IdHarmCond
+		SELECT @NextIdWork, IdHC FROM dbo.HarmfulConditions 
+		WHERE IdHC IN (@AddHarmCond1, @AddHarmCond2, @AddHarmCond3, 
+					   @AddHarmCond4, @AddHarmCond5);
+END;
 --9. Dodanie nowych warunków szkodliwych z przypisaniem badań
 IF @AddHarmCondName IS NOT NULL AND @AddTest1 IS NOT NULL
-	BEGIN
+BEGIN
+IF EXISTS
+	(SELECT Name FROM dbo.HarmfulConditions WHERE Name = @AddHarmCondName)
+		BEGIN
+			ROLLBACK TRAN
+			PRINT 'Takie warunki szkodliwe już istnieją, sprawdź listę w tabeli dbo.HarmfulConditions'
+			RETURN
+		END;
+--Sprawdź czy numery @AddTests istnieją w tabeli dbo.Tests
+IF @AddTest1 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest1)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest1: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+IF @AddTest2 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest2)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest2: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+IF @AddTest3 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest3)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest3: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+IF @AddTest4 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest4)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest4: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
+IF @AddTest5 IS NOT NULL
+	IF NOT EXISTS (SELECT IdTest FROM dbo.Tests WHERE IdTest = @AddTest5)
+		BEGIN	
+			ROLLBACK TRAN
+			PRINT '@AddTest5: Nie ma takiego id badań, sprawdź listę w tabeli dbo.Tests'
+			RETURN
+		END;
 -- IdHC nie jest typu IDENTITY
--- Metoda dodaje Id o 1 większe od ostatniego i zapisuje w zmiennej @NextIdHarmCond
-	DECLARE @NextIdHarmCond as INT = (SELECT MAX(IdHC) +1 FROM dbo.HarmfulConditions)
-		
-		INSERT INTO dbo. HarmfulConditions (IdHC, Name)
-			OUTPUT
-				inserted.IdHC as New_IdHarmCond,
-				inserted.Name as New_HarmCondName
-			VALUES (@NextIdHarmCond, @AddHarmCondName);
+-- Metoda ustawia Id o 1 większe od ostatniego i zapisuje w zmiennej @NextIdHarmCond
+DECLARE @NextIdHarmCond as INT = (SELECT MAX(IdHC) +1 FROM dbo.HarmfulConditions)
 
-		INSERT INTO dbo.HarmCondTests(IdHC, IdTest)
-			OUTPUT
-				inserted.IdHC as New_IdHarmCond,
-				inserted.IdTest as IdTest
-			SELECT @NextIdHarmCond, IdTest FROM dbo.Tests
-				WHERE IdTest IN (@AddTest1, @AddTest2, @AddTest3, @AddTest4, @AddTest5);
-	END
+--Wstawianie nowych danych do tabel HarmfulConditions i HarmCondTests
+	INSERT INTO dbo.HarmfulConditions (IdHC, Name)
+		OUTPUT
+			inserted.IdHC as New_IdHarmCond,
+			inserted.Name as New_HarmCondName
+		VALUES (@NextIdHarmCond, @AddHarmCondName);
+
+	INSERT INTO dbo.HarmCondTests(IdHC, IdTest)
+		OUTPUT
+			inserted.IdHC as New_IdHarmCond,
+			inserted.IdTest as IdTest
+		SELECT @NextIdHarmCond, IdTest FROM dbo.Tests
+			WHERE IdTest IN (@AddTest1, @AddTest2, @AddTest3, @AddTest4, @AddTest5);
+END;
 
 END TRY
 
