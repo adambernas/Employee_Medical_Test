@@ -1,19 +1,19 @@
---Tytu≥: Lista badaÒ wymagana pod konkretne warunki szkodliwe
---Autor: Adam Bernaú
+Ôªø--Tytu≈Ç: Lista bada≈Ñ wymagana pod konkretne warunki szkodliwe
+--Autor: Adam Berna≈õ
 --Update: 14-03-2022
 --Version v1.2
 
-/*Podglπd raportu
+/*PodglƒÖd raportu
 SELECT * FROM dbo.View_HarmCondTests
 */
 USE EmployeeMedicalTest
 GO
 
---UsuÒ widok jeøeli istnieje
+--Usu≈Ñ widok je≈ºeli istnieje
 IF OBJECT_ID ('dbo.View_HarmCondTests') IS NOT NULL DROP VIEW dbo.View_HarmCondTests
 GO
 
---Tworzenie widoku z opcjπ SCHEMABINDING oraz CHECK OPTION
+--Tworzenie widoku z opcjƒÖ SCHEMABINDING oraz CHECK OPTION
 
 CREATE VIEW dbo.View_HarmCondTests
 WITH SCHEMABINDING
@@ -23,7 +23,7 @@ SELECT
 	   HC.Name	 as [Warunki szkodliwe],
 	   T.Name	 as Badania,
 	   T.Price	 as [Cena badania],
-	   COUNT(*)OVER(PARTITION BY HC.Name ORDER BY HC.Name) as [Liczba badaÒ]
+	   COUNT(*)OVER(PARTITION BY HC.Name ORDER BY HC.Name) as [Liczba bada≈Ñ]
 FROM dbo.HarmfulConditions as HC
 JOIN dbo.HarmCondTests	   as HCT
 	ON HC.IdHC = HCT.IdHC
